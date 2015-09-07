@@ -50,6 +50,93 @@ void MakeAbsoluteDate(struct tm* date)
 	date->tm_mon += 1;
 }
 
+///
+//Calculates the number of days in the current month of a struct tm.
+
+int CalculateDaysInMonth(struct tm* date)
+{
+	switch(date->tm_mon)
+	{
+	case 1:
+		return 31; break;
+	case 2:
+		return (date->tm_year % 4 == 0) ?
+			 29 : 28; break;
+	case 3: 
+		return 31; break;
+	case 4: 
+		return 30; break;
+	case 5:
+		return 31; break;
+	case 6:
+		return 30; break;
+	case 7:
+		return 31; break;
+	case 8:
+		return 31; break;
+	case 9:
+		return 30; break;
+	case 10:
+		return 31; break;
+	case 11:
+		return 30; break;
+	case 12:
+		return 31; break;
+	default:
+		return 0;
+	}
+}
+
+///
+//Subtracts date B from date A (A - B) and stores the result in the destination
+//
+//Parameters:
+//	dest: The destination to store the resulting timespan
+//	dateA: The date which we are subtracting from
+//	dateB: The date which we are subtracting
+void SubtractDates(struct tm* dest, struct tm* dateA, struct tm* dateB)
+{
+
+	if(dateA->tm_sec < dateB->tm_sec)
+	{
+		dateA->tm_sec += 60;
+		dateA->tm_min--;
+	}
+	dest->tm_sec = dateA->tm_sec - dateB->tm_sec;
+
+
+
+	if(dateA->tm_min < dateB->tm_min)
+	{
+		dateA->tm_min += 60;
+		dateA->tm_hour--;
+	}
+	dest->tm_min = dateA->tm_min - dateB->tm_min;
+
+
+	if(dateA->tm_hour < dateB->tm_hour)
+	{
+		dateA->tm_hour += 24;
+		dateA->tm_mday--;
+	}
+	dest->tm_hour = dateA->tm_hour - dateB->tm_hour;
+
+	if(dateA->tm_mday < dateB->tm_mday)
+	{
+		dateA->tm_mday += CalculateDaysInMonth(dateA);
+		dateA->tm_mon--;
+	}
+	dest->tm_mday = dateA->tm_mday - dateB->tm_mday;
+
+	if(dateA->tm_mon < dateB->tm_mon)
+	{
+		dateA->tm_mon += 12;
+		dateA->tm_year--;
+	}
+	dest->tm_mon = dateA->tm_mon - dateB->tm_mon;
+	dest->tm_year = dateA->tm_year - dateB->tm_year;
+}
+
 int main(int argc, char* argv[])
 {
 	//Check input
@@ -73,6 +160,15 @@ int main(int argc, char* argv[])
 	FormattedPrint(&date);
 	printf("Your birthday is ");
 	FormattedPrint(&birthday);
+
+	//Find the difference
+	double differenceInSeconds = difftime(mktime(&date), mktime(&birthday));
+	printf("The difference in seconds is %f\n", differenceInSeconds);
+	
+	struct tm difference;	
+	SubtractDates(&difference, &date, &birthday);
+	printf("The difference is ");
+	FormattedPrint(&difference);
 
 	return 0;
 }
